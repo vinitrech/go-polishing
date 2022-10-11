@@ -2,17 +2,37 @@ package logs
 
 // Application identifies the application emitting the given log.
 func Application(log string) string {
-	panic("Please implement the Application() function")
+	for _, value := range log {
+		if value == 10071 {
+			return "recommendation"
+		} else if value == 128269 {
+			return "search"
+		} else if value == 9728 {
+			return "weather"
+		}
+	}
+
+	return "default"
 }
 
 // Replace replaces all occurrences of old with new, returning the modified log
 // to the caller.
 func Replace(log string, oldRune, newRune rune) string {
-	panic("Please implement the Replace() function")
+	newString := ""
+
+	for _, value := range log {
+		if value == oldRune {
+			newString += string(newRune)
+		} else {
+			newString += string(value)
+		}
+	}
+
+	return newString
 }
 
 // WithinLimit determines whether or not the number of characters in log is
 // within the limit.
 func WithinLimit(log string, limit int) bool {
-	panic("Please implement the WithinLimit() function")
+	return len([]rune(log)) <= limit
 }
