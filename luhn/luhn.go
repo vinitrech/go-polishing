@@ -1,9 +1,6 @@
 package luhn
 
-import (
-	"strconv"
-	"unicode"
-)
+import "fmt"
 
 func Valid(id string) bool {
 
@@ -11,44 +8,33 @@ func Valid(id string) bool {
 		return false
 	}
 
-	digits := []int{}
-	isCandidateToDouble := false
+	count, sum := 0, 0
 
 	for x := len(id) - 1; x >= 0; x-- {
 
-		if unicode.IsDigit(rune(id[x])) {
+		if id[x] >= '0' && id[x] <= '9' {
 
-			value, _ := strconv.Atoi(string(id[x]))
+			value := int(id[x] - '0')
 
-			if isCandidateToDouble {
+			if count%2 == 1 {
 
-				value *= 2
+				value <<= 1
+
+				fmt.Println("Value: ", value, " - id[x]", id[x], " - rune", '0')
 
 				if value > 9 {
 					value -= 9
 				}
 
-				isCandidateToDouble = false
-			} else {
-				isCandidateToDouble = true
 			}
 
-			digits = append(digits, value)
+			sum += value
+			count++
 
-		} else if !unicode.IsSpace(rune(id[x])) {
+		} else if id[x] != ' ' {
 			return false
 		}
 	}
 
-	if len(digits) < 2 {
-		return false
-	}
-
-	sum := 0
-
-	for _, value := range digits {
-		sum += value
-	}
-
-	return sum%10 == 0
+	return sum%10 == 0 && count > 1
 }
