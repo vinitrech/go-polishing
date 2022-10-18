@@ -23,19 +23,16 @@ func ConcurrentFrequency(l []string) FreqMap {
 	channels := make(chan FreqMap, len(l))
 	var wg sync.WaitGroup
 
-	wg.Add(len(l))
-
 	for _, x := range l {
+		wg.Add(1)
 		go func(x string) {
 			channels <- Frequency(x)
 			wg.Done()
 		}(x)
 	}
 
-	go func() {
-		wg.Wait()
-		defer close(channels)
-	}()
+	wg.Wait()
+	close(channels)
 
 	for c := range channels {
 		for index, value := range c {
