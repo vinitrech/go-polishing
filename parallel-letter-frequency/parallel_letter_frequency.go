@@ -19,6 +19,7 @@ func ConcurrentFrequency(l []string) FreqMap {
 
 	sum := FreqMap{}
 	channels := make(chan FreqMap, len(l))
+	defer close(channels)
 
 	for _, x := range l {
 		go func(x string) {
