@@ -1,57 +1,44 @@
+// Package tree implements a method to build a simple
+// tree data structure.
 package tree
 
-import "fmt"
+import (
+	"errors"
+	"sort"
+)
 
+// Record represent a single record
 type Record struct {
-	ID     int
+	// ID node identifier
+	ID int
+	// Parent node parent ID
 	Parent int
 }
 
+// Node holds tree node data
 type Node struct {
-	ID       int
+	// ID parent node indentifier
+	ID int
+	// Children nodes
 	Children []*Node
 }
 
-const rootID = 0
-
+// Build returns a simple tree from a give array
+// of records
 func Build(records []Record) (*Node, error) {
-	if len(records) == 0 {
-		return nil, nil
-	}
-
-	positions := make([]int, len(records))
-
+	node := make(map[int]*Node, len(records))
+	// Sort by ID.
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].ID < records[j].ID
+	})
 	for i, r := range records {
-		if r.ID < rootID || r.ID >= len(records) {
-			return nil, fmt.Errorf("out of bounds record id %d", r.ID)
+		if r.ID != i || r.Parent > r.ID || r.ID > 0 && r.Parent == r.ID {
+			return nil, errors.New("not in sequence or has bad parent")
 		}
-
-		positions[r.ID] = i
+		node[r.ID] = &Node{ID: r.ID}
+		if r.ID != 0 {
+			node[r.Parent].Children = append(node[r.Parent].Children, node[r.ID])
+		}
 	}
-
-	nodes := make([]Node, len(records))
-
-	for i := range positions {
-		r := records[positions[i]]
-
-		if r.ID != i {
-			return nil, fmt.Errorf("non-contiguous node %d (want %d)", r.ID, i)
-		}
-
-		validParentForChild := (r.ID > r.Parent) || (r.ID == rootID && r.Parent == rootID)
-
-		if !validParentForChild {
-			return nil, fmt.Errorf("node %d has impossible parent %d", r.ID, r.Parent)
-		}
-
-		nodes[i].ID = i
-
-		if i != rootID {
-			p := &nodes[r.Parent]
-			p.Children = append(p.Children, &nodes[i])
-		}
-
-	}
-
-	return &nodes[0], nil
+	return node[0], nil
 }
